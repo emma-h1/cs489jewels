@@ -1,6 +1,7 @@
 local Class = require "libs.hump.class"
 local Timer = require "libs.hump.timer"
 local Tween = require "libs.tween" 
+local Sounds = require "src.game.SoundEffects"
 
 local statFont = love.graphics.newFont(26)
 
@@ -50,6 +51,8 @@ function Stats:increaseTime()
     
         if self.elapsedSecs >= self.maxSecs then
             self.timeOut = true
+            Sounds['timeOut']:play()
+            gameState = "over" -- Lost game, go to game over
         end
     end
 end

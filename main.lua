@@ -44,6 +44,9 @@ function love.keypressed(key)
         debugFlag = not debugFlag
     elseif key == "return" and gameState=="start" then
         gameState = "play"
+    elseif key == "return" and gameState=="over" then
+        stats = Stats() -- reset stats
+        gameState = "play"
     end
 end
 
@@ -76,7 +79,7 @@ function love.update(dt)
         board:update(dt)
 
     elseif gameState == "over" then
-        -- for later, if we needed
+
     end
 end
 
@@ -127,8 +130,16 @@ function drawPlayState()
 end
 
 function drawGameOverState()
+    bg1:draw()
+    bg2:draw()
+
+    -- Display necessary info
     love.graphics.printf("GameOver",titleFont,0,50,
         gameWidth,"center")
+    love.graphics.printf("Score: "..stats.totalScore,titleFont,0,100,
+        gameWidth,"center")
+    love.graphics.printf("Level: "..stats.level,titleFont,0,130,
+        gameWidth,"center")
     love.graphics.printf("Press Enter to Play or Escape to exit",
-        0,90, gameWidth,"center")
+        0,170, gameWidth,"center")
 end
