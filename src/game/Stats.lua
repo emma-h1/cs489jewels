@@ -14,6 +14,9 @@ function Stats:init()
     self.elapsedSecs = 0 -- elapsed seconds
     self.timeOut = false -- when time is out
     self.tweenLevel = nil -- for later
+
+    self.timer = Timer.new()
+    self.timer:every(1, function() self:increaseTime() end)
 end
 
 function Stats:draw()
@@ -25,6 +28,7 @@ function Stats:draw()
 end
     
 function Stats:update(dt) -- for now, empty function
+    self.timer:update(dt)
 end
 
 function Stats:addScore(n)
@@ -38,6 +42,16 @@ function Stats:levelUp()
     self.level = self.level +1
     self.targetScore = self.targetScore+self.level*1000
     self.elapsedSecs = 0
+end
+
+function Stats:increaseTime()
+    if not self.timeOut then
+        self.elapsedSecs = self.elapsedSecs + 1
+    
+        if self.elapsedSecs >= self.maxSecs then
+            self.timeOut = true
+        end
+    end
 end
     
 return Stats

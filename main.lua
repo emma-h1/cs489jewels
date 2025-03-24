@@ -1,3 +1,5 @@
+-- Authors: Callie Walker and Emma Heiser
+
 local Globals = require "src.Globals"
 local Push = require "libs.push"
 local Background = require "src.game.Background"
