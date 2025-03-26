@@ -41,6 +41,10 @@ function Stats:update(dt) -- for now, empty function
     if self.tweenLevel then -- if tween is active then tween level text
         self.tweenLevel:update(dt)
     end
+
+    if self.timeOut then
+        gameState = "over" -- Lost game, go to game over
+    end
 end
 
 function Stats:addScore(n)
@@ -53,21 +57,18 @@ end
 function Stats:levelUp()
     self.level = self.level +1
     self.targetScore = self.targetScore+self.level*1000
-    self.elapsedSecs = 0
+    self.elapsedSecs = -1
     Sounds['levelUp']:play()
     self.y = gameHeight/2
     self.tweenLevel = Tween.new(1, self, {y = 10}) --tween level text
 end
 
 function Stats:clock()
-    if not self.timeOut then
-        self.elapsedSecs = self.elapsedSecs + 1
+    self.elapsedSecs = self.elapsedSecs + 1
     
-        if self.elapsedSecs >= self.maxSecs then
-            self.timeOut = true
-            Sounds['timeOut']:play()
-            gameState = "over" -- Lost game, go to game over
-        end
+    if self.elapsedSecs >= self.maxSecs then
+        self.timeOut = true
+        Sounds['timeOut']:play()
     end
 end
     
