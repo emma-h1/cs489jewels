@@ -72,13 +72,14 @@ function love.update(dt)
     stats:update(dt)
 
     if gameState == "start" then
-
+        Sounds['playStateMusic']:play()
         gem1:update(dt)
         gem2:update(dt)
     elseif gameState == "play" then
         board:update(dt)
 
     elseif gameState == "over" then
+        Sounds['playStateMusic']:stop()
 
     end
 end
