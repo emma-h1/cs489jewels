@@ -16,6 +16,13 @@ function Stats:init()
     self.elapsedSecs = 0 -- elapsed seconds
     self.timeOut = false -- when time is out
     self.tweenLevel = nil -- for later
+    self.tweenCombo = nil
+
+    self.yLevel = 10
+    self.yCombo = gameHeight-50
+    self.combo = 1
+    self.tweenCombo = nil
+
 
     self.timer = Timer.new()
     self.timer:every(1, function() self:clock() end)
@@ -28,6 +35,8 @@ function Stats:draw()
     end
     love.graphics.setColor(1,0,1)
     love.graphics.printf("Level "..tostring(self.level), statFont, gameWidth/2-60,self.y,100,"center")
+    love.graphics.printf("Chain/Combo "..tostring(self.combo), statFont,10,self.yCombo,200)
+
     if self.y <= 10 then
         love.graphics.printf("Time "..tostring(self.elapsedSecs).."/"..tostring(self.maxSecs), statFont,10,10,200)
         love.graphics.printf("Score "..tostring(self.totalScore), statFont,gameWidth-210,10,200,"right")
@@ -42,6 +51,9 @@ function Stats:update(dt) -- for now, empty function
         self.tweenLevel:update(dt)
     end
 
+    -- if self.tweenCombo then
+    --     self.tweenCombo:update(dt)
+    -- end
     if self.timeOut then
         gameState = "over" -- Lost game, go to game over
     end
@@ -60,8 +72,17 @@ function Stats:levelUp()
     self.elapsedSecs = -1
     Sounds['levelUp']:play()
     self.y = gameHeight/2
-    self.tweenLevel = Tween.new(1, self, {y = 10}) --tween level text
+    self.tweenLevel = Tween.new(1, self, {y=10}) --tween level text
 end
+
+function Stats:increaseCombo()
+    self.combo = self.combo + 1
+    self.elapsedSecs = -1
+    -- if self.combo > 1 then
+    --     self.y = gameHeight - 20
+    --     --self.tweenCombo = Tween.new(1, self, {y=gameHeight-50})
+    -- end
+end 
 
 function Stats:clock()
     self.elapsedSecs = self.elapsedSecs + 1

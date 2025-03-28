@@ -30,6 +30,7 @@ function Board:init(x,y, stats)
     self.color = nil
     self.explosions = {}
     self.arrayFallTweens = {}
+    self.matchCount = nil
 end
 
 function Board:createGem(row,col)
@@ -98,6 +99,13 @@ function Board:update(dt)
 
     if #self.arrayFallTweens == 0 then
         self:matches()
+        if self.matchCount > 1 then
+            self.stats:increaseCombo()
+        else
+            self.stats.combo = 1
+            self.matchCount = 0
+        end
+
     end
 
     if self.tweenGem1 ~= nil and self.tweenGem2~=nil then
@@ -245,12 +253,14 @@ function Board:matches()
     local horMatches = self:findHorizontalMatches()
     local verMatches = self:findVerticalMatches() 
     local score = 0
+    self.matchCount = 0
     if #horMatches > 0 or #verMatches > 0 then -- if there are matches
         for k, match in pairs(horMatches) do
             score = score + 2^match.size * 10   
             for j=0, match.size-1 do
                 self.tiles[match.row][match.col+j] = nil
                 self:createExplosion(match.row,match.col+j)
+                self.matchCount = self.matchCount + 1
             end -- end for j 
         end -- end for each horMatch 
 
@@ -259,6 +269,7 @@ function Board:matches()
             for i=0, match.size-1 do
                 self.tiles[match.row+i][match.col] = nil
                 self:createExplosion(match.row+i,match.col)
+                self.matchCount = self.matchCount + 1
             end -- end for i 
         end -- end for each verMatch
 
