@@ -27,6 +27,7 @@ function Board:init(x,y, stats)
 
     self.tweenGem1 = nil
     self.tweenGem2 = nil
+    self.color = nil
     self.explosions = {}
     self.arrayFallTweens = {}
 end
@@ -196,6 +197,7 @@ function Board:findHorizontalMatches()
                 same = same +1
             elseif same > 2 then -- match-3+
                 table.insert(matches,{row=i, col=(j-same), size=same})
+                self.color = self.tiles[i][j-1].type -- check color of Gem included in match
                 same = 1
             else -- different but no match-3
                 same = 1
@@ -204,6 +206,7 @@ function Board:findHorizontalMatches()
 
         if same > 2 then
             table.insert(matches,{row=i, col=(Board.MAXCOLS-same+1), size=same})
+            self.color = self.tiles[i][Board.MAXCOLS-same+1].type
             same = 1
         end
     end -- end for i
@@ -221,6 +224,7 @@ function Board:findVerticalMatches()
                 same = same +1
             elseif same > 2 then -- match-3+
                 table.insert(matches,{row=(i-same), col=j, size=same})
+                self.color = self.tiles[i-1][j].type -- check color of Gem included in match
                 same = 1
             else -- different but no match-3
                 same = 1
@@ -229,6 +233,7 @@ function Board:findVerticalMatches()
 
         if same > 2 then
             table.insert(matches,{row=(Board.MAXROWS+1-same), col=j, size=same})
+            self.color = self.tiles[Board.MAXROWS+1-same][j].type
             same = 1
         end
     end -- end for i
@@ -240,7 +245,6 @@ function Board:matches()
     local horMatches = self:findHorizontalMatches()
     local verMatches = self:findVerticalMatches() 
     local score = 0
-
     if #horMatches > 0 or #verMatches > 0 then -- if there are matches
         for k, match in pairs(horMatches) do
             score = score + 2^match.size * 10   
@@ -248,7 +252,7 @@ function Board:matches()
                 self.tiles[match.row][match.col+j] = nil
                 self:createExplosion(match.row,match.col+j)
             end -- end for j 
-        end -- end for each horMatch
+        end -- end for each horMatch 
 
         for k, match in pairs(verMatches) do
             score = score + 2^match.size * 10   
@@ -272,6 +276,17 @@ end
 
 function Board:createExplosion(row,col)
     local exp = Explosion()
+    if(self.color == 4) then
+        exp:setColor(255,255,0) -- yellow 
+    elseif(self.color == 5) then
+        exp:setColor(0,150,250)  -- blue
+    elseif(self.color == 6) then 
+        exp:setColor(255, 255, 255)  -- grey
+    elseif(self.color == 7) then
+        exp:setColor(255, 0, 0)  -- red
+    elseif(self.color == 8) then 
+        exp:setColor(0, 255, 0)  -- green
+    end 
     exp:trigger(self.x+(col-1)*Board.TILESIZE+Board.TILESIZE/2,
                self.y+(row-1)*Board.TILESIZE+Board.TILESIZE/2)  
     table.insert(self.explosions, exp) -- add exp to our array
