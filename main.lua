@@ -46,6 +46,7 @@ function love.keypressed(key)
         gameState = "play"
     elseif key == "return" and gameState=="over" then
         stats = Stats() -- reset stats
+        board = Board(140,80,stats) -- reset board
         gameState = "play"
     end
 end
@@ -69,13 +70,14 @@ function love.update(dt)
     bg1:update(dt)
     bg2:update(dt)
     testexp:update(dt)
-    stats:update(dt)
 
     if gameState == "start" then
         Sounds['playStateMusic']:play()
         gem1:update(dt)
         gem2:update(dt)
     elseif gameState == "play" then
+        Sounds['playStateMusic']:play()
+        stats:update(dt)
         board:update(dt)
 
     elseif gameState == "over" then

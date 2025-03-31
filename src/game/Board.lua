@@ -6,6 +6,7 @@ local Gem = require "src.game.Gem"
 local Cursor = require "src.game.Cursor"
 local Explosion = require "src.game.Explosion"
 local Sounds = require "src.game.SoundEffects"
+local Coin = require "src.game.Coin"
 
 local Board = Class{}
 Board.MAXROWS = 8
@@ -23,6 +24,7 @@ function Board:init(x,y, stats)
             self.tiles[i][j] = self:createGem(i,j)
         end -- end for j
     end -- end for i
+    self:createCoin()
     self:fixInitialMatrix()
 
     self.tweenGem1 = nil
@@ -31,6 +33,14 @@ function Board:init(x,y, stats)
     self.explosions = {}
     self.arrayFallTweens = {}
     self.matchCount = nil
+end
+
+-- Put a coin on a random space in the grid
+function Board:createCoin()
+    local rowCoin = math.random(1,Board.MAXROWS)
+    local colCoin = math.random(1,Board.MAXCOLS)
+    self.tiles[rowCoin][colCoin] = Coin(self.x + (colCoin-1)*Board.TILESIZE,
+                                        self.y+(rowCoin-1)*Board.TILESIZE, 1)
 end
 
 function Board:createGem(row,col)
@@ -120,6 +130,12 @@ function Board:update(dt)
             self.cursor:clear()
             self:matches()
         end
+    end
+
+    -- Put a new coin on the grid when a new level is reached
+    if self.stats.levelIncrease then
+        self:createCoin()
+        self.stats.levelIncrease = false
     end
 end
 
@@ -256,6 +272,7 @@ function Board:matches()
     self.matchCount = 0 -- tracks number of times function is called
     if #horMatches > 0 or #verMatches > 0 then -- if there are matches
         for k, match in pairs(horMatches) do
+            self:adjacentToCoinHorizontal(match.row, match.col, match.size)
             score = score + 2^match.size * 10   
             for j=0, match.size-1 do
                 self.tiles[match.row][match.col+j] = nil
@@ -265,6 +282,7 @@ function Board:matches()
         end -- end for each horMatch 
 
         for k, match in pairs(verMatches) do
+            self:adjacentToCoinVertical(match.row, match.col, match.size)
             score = score + 2^match.size * 10   
             for i=0, match.size-1 do
                 self.tiles[match.row+i][match.col] = nil
@@ -283,6 +301,100 @@ function Board:matches()
         self:shiftGems()
         self:generateNewGems()
     end -- end if (has matches)
+end
+
+-- Check adjacent spaces in a horizontal match for coins
+function Board:adjacentToCoinHorizontal(matchRow, matchCol, size)
+    local coins = {} -- store coins, can have multiple if coin from prev level not collected
+
+    if matchRow > 1 then --row is not at edge
+        -- check row above match for coins
+        for j = 0, size-1 do
+            if (self.tiles[matchRow-1][matchCol+j])  -- prevent nil error
+            and (self.tiles[matchRow-1][matchCol+j].type == 1) then -- coin check
+                table.insert(coins, {row = matchRow-1, col = matchCol+j})
+            end
+        end
+    end
+
+    if matchRow < Board.MAXROWS then -- row is not at edge
+        -- check row below match for coins
+        for j = 0, size -1 do
+            if (self.tiles[matchRow+1][matchCol+j])  -- prevent nil error
+            and (self.tiles[matchRow+1][matchCol+j].type == 1) then -- coin check
+                table.insert(coins, {row = matchRow+1, col = matchCol+j})
+            end
+        end
+    end
+
+    -- check col to right of match
+    if (matchCol + size <=Board.MAXCOLS)  -- right side is not at edge
+    and (self.tiles[matchRow][matchCol+size])  -- prevent nil error
+    and (self.tiles[matchRow][matchCol+size].type == 1) then -- is coin?
+        table.insert(coins, {row = matchRow, col = matchCol+size})
+    end
+
+    -- check col to left of match
+    if (matchCol > 1)  -- not at edge
+    and (self.tiles[matchRow][matchCol-1])  -- no nil
+    and (self.tiles[matchRow][matchCol-1].type == 1) then -- is coin
+        table.insert(coins, {row = matchRow, col = matchCol-1})
+    end
+
+    -- for each coin, make the space nil, explode animation, play sound, and give bonus to score
+    for k, coin in pairs(coins) do
+        self.tiles[coin.row][coin.col] = nil
+        self:createExplosion(coin.row,coin.col)
+        Sounds['coin']:play()
+        self.stats:addScore(100)
+    end
+end
+
+-- check adjacent spaces in vertical match for coins
+function Board:adjacentToCoinVertical(matchRow, matchCol, size)
+    local coins = {}
+
+    if matchCol > 1 then -- Not at edge
+        -- check to left of match for coins
+        for i = 0, size -1 do
+            if (self.tiles[matchRow+i][matchCol-1])  -- prevent nil
+            and (self.tiles[matchRow+i][matchCol-1].type == 1) then -- is coin
+                table.insert(coins, {row = matchRow+i, col = matchCol-1})
+            end
+        end
+    end
+
+    if matchCol < Board.MAXCOLS then -- not at edge
+        -- check to right of match for coins
+        for i = 0, size -1 do
+            if (self.tiles[matchRow+i][matchCol+1])  -- no nil
+            and (self.tiles[matchRow+i][matchCol+1].type == 1) then -- is coin
+                table.insert(coins, {row = matchRow+i, col = matchCol+1})
+            end
+        end
+    end
+
+    -- check below of match
+    if (matchRow + size <= Board.MAXROWS)  -- not at edge
+    and (self.tiles[matchRow+size][matchCol])  -- not nil
+    and (self.tiles[matchRow+size][matchCol].type == 1) then -- is coin
+        table.insert(coins, {row = matchRow+size, col = matchCol})
+    end
+
+    -- check above of match
+    if (matchRow > 1)  -- not at edge
+    and (self.tiles[matchRow-1][matchCol])  -- not nil
+    and (self.tiles[matchRow-1][matchCol].type == 1) then -- is coin
+        table.insert(coins, {row = matchRow-1, col = matchCol})
+    end
+
+    -- for each coin, set space to nil, explode animation, play sound effect, add bonus to score
+    for k, coin in pairs(coins) do
+        self.tiles[coin.row][coin.col] = nil
+        self:createExplosion(coin.row,coin.col)
+        Sounds['coin']:play()
+        self.stats:addScore(100)
+    end
 end
 
 function Board:createExplosion(row,col)

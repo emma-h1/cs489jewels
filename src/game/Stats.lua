@@ -9,7 +9,8 @@ statFontSize=26
 local Stats = Class{}
 function Stats:init()
     self.y = 10 -- we will need it for tweening later
-    self.level = 1 -- current level    
+    self.level = 1 -- current level  
+    self.levelIncrease = false -- for coin  
     self.totalScore = 0 -- total score so far
     self.targetScore = 1000
     self.maxSecs = 99 -- max seconds for the level
@@ -20,7 +21,6 @@ function Stats:init()
 
     self.yCombo = gameHeight-50
     self.combo = 1 --combo starts counting after another combo
-    self.tweenCombo = nil
 
 
     self.timer = Timer.new()
@@ -73,6 +73,7 @@ function Stats:addScore(n)
 end
 
 function Stats:levelUp()
+    self.levelIncrease = true
     self.level = self.level +1
     self.targetScore = self.targetScore+self.level*1000
     self.elapsedSecs = -1
