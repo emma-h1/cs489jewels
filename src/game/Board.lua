@@ -319,7 +319,7 @@ function Board:adjacentToCoinHorizontal(matchRow, matchCol, size)
 
     if matchRow < Board.MAXROWS then -- row is not at edge
         -- check row below match for coins
-        for j = 0, size -1 do
+        for j = 0, size-1 do
             if (self.tiles[matchRow+1][matchCol+j])  -- prevent nil error
             and (self.tiles[matchRow+1][matchCol+j].type == 1) then -- coin check
                 table.insert(coins, {row = matchRow+1, col = matchCol+j})
@@ -356,7 +356,7 @@ function Board:adjacentToCoinVertical(matchRow, matchCol, size)
 
     if matchCol > 1 then -- Not at edge
         -- check to left of match for coins
-        for i = 0, size -1 do
+        for i = 0, size-1 do
             if (self.tiles[matchRow+i][matchCol-1])  -- prevent nil
             and (self.tiles[matchRow+i][matchCol-1].type == 1) then -- is coin
                 table.insert(coins, {row = matchRow+i, col = matchCol-1})
@@ -366,7 +366,7 @@ function Board:adjacentToCoinVertical(matchRow, matchCol, size)
 
     if matchCol < Board.MAXCOLS then -- not at edge
         -- check to right of match for coins
-        for i = 0, size -1 do
+        for i = 0, size-1 do
             if (self.tiles[matchRow+i][matchCol+1])  -- no nil
             and (self.tiles[matchRow+i][matchCol+1].type == 1) then -- is coin
                 table.insert(coins, {row = matchRow+i, col = matchCol+1})

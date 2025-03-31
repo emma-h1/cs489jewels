@@ -21,7 +21,7 @@ function Stats:init()
 
     self.yCombo = gameHeight-50
     self.combo = 1 --combo starts counting after another combo
-
+    
 
     self.timer = Timer.new()
     self.timer:every(1, function() self:clock() end)
