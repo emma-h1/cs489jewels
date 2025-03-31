@@ -18,9 +18,8 @@ function Stats:init()
     self.tweenLevel = nil -- for later
     self.tweenCombo = nil
 
-    self.yLevel = 10
     self.yCombo = gameHeight-50
-    self.combo = 1
+    self.combo = 1 --combo starts counting after another combo
     self.tweenCombo = nil
 
 
@@ -33,9 +32,16 @@ function Stats:draw()
         love.graphics.setColor(0, 0, 0, 0.6)
         love.graphics.rectangle("fill",0,self.y-10,gameWidth,statFontSize*2)
     end
+
+    if self.yCombo < gameHeight - 50 then 
+        love.graphics.setColor(0, 0, 0, 0.6)
+        love.graphics.rectangle("fill",0,self.yCombo-10,210,statFontSize*2)
+
+    end 
     love.graphics.setColor(1,0,1)
     love.graphics.printf("Level "..tostring(self.level), statFont, gameWidth/2-60,self.y,100,"center")
     love.graphics.printf("Chain/Combo "..tostring(self.combo), statFont,10,self.yCombo,200)
+
 
     if self.y <= 10 then
         love.graphics.printf("Time "..tostring(self.elapsedSecs).."/"..tostring(self.maxSecs), statFont,10,10,200)
@@ -51,9 +57,9 @@ function Stats:update(dt) -- for now, empty function
         self.tweenLevel:update(dt)
     end
 
-    -- if self.tweenCombo then
-    --     self.tweenCombo:update(dt)
-    -- end
+    if self.tweenCombo then -- tween combo text
+        self.tweenCombo:update(dt)
+    end
     if self.timeOut then
         gameState = "over" -- Lost game, go to game over
     end
@@ -77,11 +83,10 @@ end
 
 function Stats:increaseCombo()
     self.combo = self.combo + 1
-    self.elapsedSecs = -1
-    -- if self.combo > 1 then
-    --     self.y = gameHeight - 20
-    --     --self.tweenCombo = Tween.new(1, self, {y=gameHeight-50})
-    -- end
+    if self.combo > 1 then
+         self.yCombo = gameHeight/2
+         self.tweenCombo = Tween.new(1, self, {yCombo=gameHeight-50}) -- tween combo when increase in matches
+    end
 end 
 
 function Stats:clock()

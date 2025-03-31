@@ -99,11 +99,11 @@ function Board:update(dt)
 
     if #self.arrayFallTweens == 0 then
         self:matches()
-        if self.matchCount > 1 then
+        if self.matchCount > 1 then -- matches called more than once
             self.stats:increaseCombo()
         else
             self.stats.combo = 1
-            self.matchCount = 0
+            self.matchCount = 0 --reset count
         end
 
     end
@@ -253,7 +253,7 @@ function Board:matches()
     local horMatches = self:findHorizontalMatches()
     local verMatches = self:findVerticalMatches() 
     local score = 0
-    self.matchCount = 0
+    self.matchCount = 0 -- tracks number of times function is called
     if #horMatches > 0 or #verMatches > 0 then -- if there are matches
         for k, match in pairs(horMatches) do
             score = score + 2^match.size * 10   
